@@ -1,0 +1,164 @@
+
+{% load mptt_tags %} 
+{% block additional_head %}
+    <style>
+    .view_hotel{
+        margin-bottom:20px;
+    }
+    .col_small{
+        display: inline-block;
+        width: 13%;
+    }
+    .col{
+        display: inline-block;
+        width: 23%;
+    }
+    .divider{
+        width: 20px;
+        display: inline-block;
+        text-align: center;
+    }
+    .divider span{
+        background-image: url(/static/jquery-ui-themes-1.10.3/themes/ui-lightness/images/ui-icons_222222_256x240.png);
+        background-position: -34px -50px;
+        display: inline-block;
+        margin-top: 3px;
+        width: 16px;
+        height: 16px;
+    }
+    strong{
+        display: inline-block;
+        font-weight: bold;
+        width: 49%
+        font-size: 16px;
+    }
+    </style>
+    <script>
+        $(function(){
+          $('input:text').change(function(){
+            $('.span_style').remove();
+            input = $(this);
+            data='id='+$(this).val();
+            $.ajax({
+                type: 'POST',
+                url: '{% url check_hotel_ajax %}',
+                data: data,
+                success: function(data){
+                    input.parent().next().html('<div class=\"span_style\"><strong style=\"margin:20px;\">'+data+'</strong></div>')
+                },
+                error: function(jqXHR, textStatus, errorThrown){
+                    for(i in jqXHR){
+      	             console.log(jqXHR[i]);
+                    }
+                },
+            }); 
+          });
+          $('#change_hotel').click(function(e){
+              e.preventDefault();
+              data = $(this).closest('form').serialize();              
+              obj = $(this);
+              $.ajax({
+                type: 'POST',
+                url: '{% url hotel_sync %}',
+                data: data,
+                success: function(response){
+                    obj.closest('#response_wrapper').fadeOut().html(response).fadeIn();
+                },
+                error: function(jqXHR, textStatus, errorThrown){
+                    for(i in jqXHR){
+      	             console.log(jqXHR[i]);
+                    }
+                },
+              });
+          }); 
+          
+          $('#view_hotel').click(function(e){
+              $('.tab').remove();
+              $('.row').remove();
+              //$('.span_style').remove();
+              e.preventDefault();
+              var hotel_id = document.getElementById("hotel_id").value;  
+              console.log(hotel_id);      
+              obj = $(this);
+              $.ajax({
+                type: 'POST',
+                url: '{% url hotel_sync_links %}',
+                dataType: "json",
+                data: {
+                          csrfmiddlewaretoken: '{{ csrf_token }}' , 
+                          hotel_id: hotel_id 
+                                          } ,
+                success: function(response){
+                
+                    console.log(response);   
+                    if (response){
+                    console.log(response);
+                    var a = obj.parents().find(".span_style");
+                    $(".view_hotel").append(a); 
+                    console.log(response.rendered);
+                    console.log(response.models);
+                    //hotel = "<div>" +response.model.title+ "</div>";
+                    $(".view_hotel").append(response.rendered); 
+                    $(".view_hotel").append("<br>"); 
+                     $(".view_hotel").append(response.company_list); 
+                  /*  $(".view_hotel").append("<div><b>Ссылки на отель: </b></div>"); 
+                $.each(response.models, function(key, val){                     
+                    //$('#response_wrapper').find('.view_hotel').html(function(){
+                        
+                        table = "<div class=\"tab\"><b>Таблица:  </b>"+ " " + val.name + " <b>ID записи в таблице: </b>"+ " " +val.id + " <p><br></p></div>";
+                        $(".view_hotel").append(table); 
+                        });
+            //});  */
+            } else {
+            $('#response_wrapper').find('.view_hotel').html(function(){
+                        table = '<div class=\"tab\"> Ссылок нет </div>';
+                        $(this).html(table); 
+                        });
+            };
+                },
+                error: function(jqXHR, textStatus, errorThrown){
+                    for(i in jqXHR){
+      	             console.log(jqXHR[i]);
+                    }
+                },
+              });
+          });  
+        });
+    </script>
+{% endblock %}
+    <div class='wrapper'> 
+        <div class="view_hotel">
+            <strong>Ссылки на отель в БД (введите ID отеля)</strong>
+            <input type="text" id="hotel_id" class='col_small'>
+            <input type='submit' value='Показать ссылки' id='view_hotel' class='col'>
+        </div>
+    
+        {% if new_hotel and old_hotel %}
+          <p>
+            {{ old_hotel}} объединяем с {{ new_hotel }}
+          </p>
+        {% endif %}
+        <form action='' method='POST' >
+        {% csrf_token %}
+        {{ hotel_formset.management_form }}
+        {% for form in hotel_formset %}
+            <div class='col'>
+                <strong>Старый отель</strong>
+                {{ form.old_hotel }}
+            </div><!--end col-->
+            <div class='col'>
+            </div>
+            <div class='divider'>
+                <span>
+                </span>
+            </div>
+            <div class='col'>
+                <strong>Новый отель</strong>
+                {{ form.new_hotel }}
+            </div><!--end col-->
+            <div class='col'>
+            </div>
+        {% endfor %}
+        <input type='submit' value='Внести изменения' id='change_hotel'>
+        </form>
+    </div><!--end wrapper -->

@@ -1,0 +1,796 @@
+{% extends "profile_version_15082012/tours_base.html" %}	
+{% load hotels_extras  mptt_tags %} 
+
+{% block additional_head %}
+  <style>
+  
+  #id_page {
+    width: 50px;
+    text-align: center;
+    vertical-align: middle;
+  }
+   
+  .make_publish{
+    float: right;
+  }
+  
+
+  .add-supplier {
+    text-decoration: none;
+    border-bottom: 1px dashed;
+  }
+  
+  .hotel-list .hotel-supplier-list td {
+    border-bottom: 1px solid #E3E3E3;
+    border-top: 1px solid #E3E3E3;
+    padding: 10px 4px;
+  }
+
+  .hotel-list .hotel-supplier-list a {
+    color: #09659B;
+    font-size: 12px;
+    text-decoration: none;
+  }
+  
+  .hotel-list .hotel-supplier-list a:hover {
+    text-decoration: underline;
+  }
+  
+  .hotel-list .hotel-supplier-list {
+    background-color: #F9F9F9;
+    border-bottom: 1px solid #E3E3E3;
+    border-collapse: collapse;
+    border-top: 1px solid #E3E3E3;
+    margin: 10px 0 20px 23px;
+    width: 677px;
+  }
+  
+  .hotel-list .add-supplier {
+    float: right;  
+    margin-right: 20px;
+  }
+ 
+  .hotel-list .hotel-supplier-add {
+    float: right;
+  }
+
+  .hotel-list {
+    width: 700px;
+  }
+  
+  .hotel-list .hotel-title {
+    color: #09659B;
+    float: left;
+    font-family: Arial,Helvetica,sans-serif;
+    font-size: 15px;
+    font-weight: bold;
+  }
+
+  .hotel-list .switcher {
+    margin-right: 10px;
+    margin-top: 4px;
+    float: left;
+  }
+  
+  .hotel-list .empty-img {
+    float: left;
+    height: 18px;
+    width: 21px;
+  }
+
+  .hotels_filter li,
+  .hotels_filter li:hover  {
+    list-style:none;    
+    padding: 4px 13px 6px; 
+    border-top: none !important;
+    border-left: none !important;
+    border-right: none !important;
+    -moz-border-radius: 0 !important;
+    -webkit-border-radius: 0 !important;
+    border-radius: 0 !important; 
+    margin-right: none !important;
+    float:none !important; 
+  }
+
+  .filter li {
+    background: none repeat scroll 0 0 #FFFFFF;
+  }  
+    
+  .hotels_filter select {
+    margin-left: 10px;
+    position: relative;
+    bottom: 6px;
+   } 
+   
+  div.dashed_line, .filter {
+    border-bottom: 1px dashed #aaa !important;
+    margin:1em 0 1.5em 0;
+  }     
+  </style>
+
+
+  <style>
+  .ratecode_ajax_error, .ratecode_ajax_success{
+  	font:15px bold Arial, sans-serif;
+  
+  	/* Overriding the default underline styling of the links */
+  	text-decoration:none !important;
+  	white-space:nowrap;
+  	min-width:540px;
+    width:auto;
+    margin:2px 0 2px 0;
+  	display:inline-block;
+  	vertical-align:baseline;
+  	position:relative;
+  	cursor:pointer;
+  	padding:4px 8px;
+  	
+  	background-repeat:no-repeat;
+  
+  	/* The following two rules are fallbacks, in case
+  	   the browser does not support multiple backgrounds. */
+  
+  	background-position:bottom left;
+  	
+  	/* Multiple backgrounds version. The background images
+  	   are defined individually in color classes */
+  	
+  	background-position:bottom left, top right, 0 0, 0 0;
+  	background-clip:border-box;
+  	
+  	/* Applying a default border raidus of 8px */
+  	
+  	-moz-border-radius:8px;
+  	-webkit-border-radius:8px;
+  	border-radius:8px;
+  	
+  	/* A 1px highlight inside of the button */
+  	
+  	-moz-box-shadow:0 0 1px #fff inset;
+  	-webkit-box-shadow:0 0 1px #fff inset;
+  	box-shadow:0 0 1px #fff inset;
+  	
+  	/* Animating the background positions with CSS3 */
+  	/* Currently works only in Safari/Chrome */
+  	
+  	-webkit-transition:background-position 1s;
+  	-moz-transition:background-position 1s;
+  	transition:background-position 1s;
+  }
+  
+  .ratecode_ajax_error:hover, .ratecode_ajax_success:hover{
+  	
+  	background-position:top left;
+  	background-position:top left, bottom right, 0 0, 0 0;
+  }
+  
+  .ratecode_ajax_success{
+  	color:#fff !important;
+  	background-color: #79be1e;
+  	}
+  
+  .ratecode_ajax_success:hover{
+  	color:#fff !important;
+  	background-color:#89d228;
+  }
+  
+  .ratecode_ajax_error{
+  	color:#693e0a !important;
+  	background-color: rgba(255, 173, 173, 0.83);
+  }
+  
+  .ratecode_ajax_error:hover{
+  	background-color:#ec9732;
+  } 
+  .ratings { width:70px;height: 11px;background: url({{ STATIC_URL }}search_form/img/ratings.png) no-repeat 0 0;display: inline-block;}
+  .ratings_style2 {background: url({{ STATIC_URL }}search_form/img/ratings2.png) no-repeat 0 0;}
+  .ratings span {display: block;width:12px;height: 11px;padding: 0 1px;float: left;cursor: pointer;}
+  .ratings span:first-child {padding-left: 0;}
+  .r0 {background-position: 0 0;}
+  .r1,.hover-star1 {background-position: 0 -11px;}
+  .r2,.hover-star2 {background-position: 0 -22px;}
+  .r3,.hover-star3 {background-position: 0 -33px;}
+  .r4,.hover-star4 {background-position: 0 -44px;}
+  .r5,.hover-star5 {background-position: 0 -55px;}
+  </style>
+  
+  
+  <style>
+  #connect_to_ratecode_form{
+    margin: 0;
+    padding: 0;
+  }
+        
+  #connect_to_ratecode_form_submit{
+    width: 100px;
+  }
+       
+  #connect_to_ratecode{
+    margin: 0;
+    padding: 0;
+    margin-top: 10px;
+    width: 320px;
+  }
+  
+  #connect_to_ratecode .form_error{
+    color: red;
+  }
+  
+  #connect_to_ratecode tr:first-child td{
+    padding: 3px!important;
+  }
+  
+  #connect_to_ratecode input{
+    width: 50px;
+  }
+  
+  #connect_to_ratecode_title{
+    background: -moz-linear-gradient(center top , rgb(254, 174, 70) 0%, rgb(249, 132, 51) 38%, rgb(248, 125, 47) 48%, rgb(248, 124, 47) 100%) repeat scroll 0px 0px transparent;
+    background: -webkit-linear-gradient(top, #FEAE46 0%, #F98433 38%, #F87D2F 48%, #F87C2F 100%) repeat scroll 0 0 transparent;
+    background: -o-linear-gradient(top, #FEAE46 0%, #F98433 38%, #F87D2F 48%, #F87C2F 100%) repeat scroll 0 0 transparent;
+    background: -ms-linear-gradient(top, #FEAE46 0%, #F98433 38%, #F87D2F 48%, #F87C2F 100%) repeat scroll 0 0 transparent;
+    color: white;
+    display: block;
+    font-size: 1.3em;
+    height: 19px;
+    padding: 10px;
+    border: 1px solid rgb(170, 170, 170);
+    border-radius: 4px;
+    margin-bottom: 5px;
+  }
+  
+  #id_code{
+    width: 140px!important;
+    padding: 3px;
+  }
+  </style>  
+  
+  <script src="{{ MEDIA_URL }}js/hotels/make_publish.js"></script>
+	<script src="{{ MEDIA_URL }}js/commands_multiple.js"></script> 	
+	<script src="{{ MEDIA_URL }}js/hotels/hotel_list.js"></script>
+	<script src="{{ MEDIA_URL }}js/hotels/user_catalog.js" charset='utf-8'></script>  
+	
+  <script>
+		var delete_hotel_supplier_url = "{% url delete_hotel_suppliers  %}";
+		var create_resort_url = "/user-catalog/create-resort/#/";
+		var create_area_url = "/user-catalog/create-area/#/";
+		var create_hotel_url_short = "/user-catalog/create-hotel/#/";
+		var create_hotel_url_full = "/user-catalog/create-hotel/#1/#2/";
+		var order_rate_code_url = "{% url rate_code_order %}";
+		var set_rate_code_url = "{% url set_rate_code_multiple %}";
+    var selected_hs_prices_publicate_url = '{% url selected_hs_prices_publicate %}';
+    var hotel_list_url = "{% url hotel_list %}"
+	</script>
+
+
+  <script>
+  $(function(){
+
+    function commands_res(data){
+      $('html, body').css("cursor", "auto");
+      $('#connect_suppliers_to_rc_ajax_response').append('<b style="color:green">' + data + '</b><br />');
+    }
+  
+    get_ajax_data_hs_rc = '{% url get_ajax_data_hs_rc hs_rate_code_pk=1 %}';
+    var url_ajax_data_hs_rc = get_ajax_data_hs_rc.replace('1/','');
+    
+    get_ajax_data_hs = '{% url get_ajax_data_hs hs_pk=1 %}';
+    var url_ajax_data_hs = get_ajax_data_hs.replace('1/','');    
+
+    $('#connect_suppliers_to_rc_button').click(function() {
+        $('#connect_suppliers_to_rc_ajax_response').empty();
+        
+        $('.connect_to_ratecode input[type=text]').each(function(){
+          var this_val = $.trim($(this).val());
+          if(!this_val){
+            $(this).val('0');
+          }
+        });        
+                
+        var room_markup = $.trim($('#room_markups').val());
+        var room_discount = $.trim($('#room_commissions').val());
+        var extra_bed_markup = $.trim($('#eb_markup').val());
+        var extra_bed_discount = $.trim($('#eb_commission').val());
+        var meal_markup = $.trim($('#meals_markup').val());
+        var meal_discount = $.trim($('#meals_commission').val());
+        var compulsory_services_markup = $.trim($('#cs_markup').val());
+        var compulsory_services_discount = $.trim($('#cs_commission').val());
+                   
+        var rate_code = $('#connect_suppliers_to_rc_select').val();
+        var formula = 'r+'.concat(room_markup).concat('%(').concat(room_discount)
+                     .concat('%),eb+').concat(extra_bed_markup).concat('%(').concat(extra_bed_discount)
+                     .concat('%),m+').concat(meal_markup).concat('%(').concat(meal_discount)
+                     .concat('%),cs+').concat(compulsory_services_markup).concat('%(')
+                     .concat(compulsory_services_discount).concat('%);').concat(rate_code.toLowerCase())
+        
+        $('#upall_formula').val(formula);
+        
+        var rewrite_exist;
+        var $rewrite_exist = $('#rewrite_exist');
+        if ($rewrite_exist.is(':checked')) {
+            $('#rewrite').val('yes');
+        } else {
+            $('#rewrite').val('no');
+        }        
+        
+        var formula_post = $('form#connect_to_ratecode_form').serialize();
+
+        // Звездность
+        st_arr = new Array()    
+        $(this).parent().parent().find('.select_starsforconnect').each(function () {
+           
+           if (this.checked) {
+                var s = this.id.split('_')[1];  
+                st_arr.push(s);
+           }
+        })
+        
+
+        $('input[name=hotels]:checked').each(function(){
+            var post_dict = {};
+            if (room_markups.length) {post_dict['room_markups'] = room_markups}        
+            if (room_commissions.length) {post_dict['room_commissions'] = room_commissions}
+            if (eb_markup.length) {post_dict['eb_markup'] = eb_markup}
+            if (eb_commission.length) {post_dict['eb_commission'] = eb_commission}
+            if (meals_markup.length) {post_dict['meals_markup'] = meals_markup}
+            if (meals_commission.length) {post_dict['meals_commission'] = meals_commission}
+            if (cs_markup.length) {post_dict['cs_markup'] = cs_markup}
+            if (cs_commission.length) {post_dict['cs_commission'] = cs_commission}
+            var item_type = $(this).attr('class');
+            
+            if (item_type == 'hs') {
+            
+                var hs_id = $(this).val(); 
+                var url = url_ajax_data_hs + hs_id + '/';
+                
+                $.post(url, {}, function(data) {
+                    if (st_arr.indexOf('all') !== -1) {
+                      $.post(data.url, formula_post, commands_res);                      
+                    } else {
+                        if (st_arr.indexOf(data.stars) !== -1) {
+                            $.post(data.url, formula_post, commands_res);
+                        } else {
+                            return 'next iteration';
+                        }
+                    }                                   
+                });                
+                
+            }
+            
+            else if (item_type == 'hsrc') {
+                
+                var hs_rc_id = $(this).val(); 
+                var url = url_ajax_data_hs_rc + hs_rc_id + '/';
+                              
+                $.post(url, {}, function(data) {
+                    if (st_arr.indexOf('all') !== -1) {
+                      $.post(data.url, formula_post, commands_res);                      
+                    } else {
+                        if (st_arr.indexOf(data.stars) !== -1) {
+                            $.post(data.url, formula_post, commands_res);
+                        } else {
+                            return 'next iteration';
+                        }
+                    }                                   
+                });          
+            }
+            
+        });
+
+        return false;
+    });
+    
+    $('#connect_to_ratecode_href').click(function (e) {    
+        e.preventDefault();
+        $( ".connect_to_ratecode" ).toggle();        
+    });
+  }); 
+  </script> 
+{% endblock %}
+
+{% block page_title %}
+  {% if not metatags.get_meta_title %}  
+      Hotels
+  {% else %}
+      {{ metatags.get_meta_title }}
+  {% endif %}
+{% endblock %}
+
+{% block profile_content %}
+{% load userprofiles_extras companies_extras i18n %}
+  
+  {% if messages %}
+  <ul class="messages">
+    	{% for message in messages %}
+    	<li class="{{ message.tags }}">{{ message }}</li>
+    	{% endfor %}
+  </ul>
+  <br />
+  {% endif %}
+  
+	{% csrf_token %}
+	<h2>{% trans "Hotels" %}</h2>
+
+  <div>
+      <a href='{% url hotel_list %}'>{% trans "Hotels" %} </a> |
+      <a href='{% url import_rate_code %}'>{%trans "Import rate code" %}</a>
+  </div>
+
+   
+  <div>
+    	<form action="" class="form">
+    	{{ filter_form.query|custom_dom_attribute:"style=width:745px;" }}
+    	<input type="submit" value="{% trans "Фильтр" %}">
+    	</form>  
+  </div>
+  
+  <form name="filter_form" id="id_filter_form" action="{% url hotel_list %}"  method="get">
+    	<div class="filter form" style="padding-top: 10px;">
+          <table class='hotels_filter'>
+              <tr>
+                  <td>
+                  		<b>{% trans "Country" %}: </b>
+                  		<select id="id_country" class="selectbox" name="country" style="width: 200px;">
+                          <option value="">All</option>
+                  				{% for country in countries %}
+                  					 <option value="{{ country.1 }}" {% if GET.country == country.1 %}selected="selected"{% endif %}>{{ country.0|capfirst }}</option>
+                  				{% endfor %}
+                  				<option class="create-new" value="_">Add country</option>
+                  		</select>
+                      
+                      <br />
+                  		<b>{% trans "Region/Island/City" %}: </b>
+                  		<select id="id_resort" class="selectbox" name="resort" style="width: 200px;">
+                                  <option value="">All</option>
+                  				{% for resort in resorts %}
+                  					<option value="{{ resort.1 }}" {% if GET.resort == resort.1 %}selected="selected"{% endif %}>{{ resort.0 }}</option>
+                  				{% endfor %}
+                  				<option class="create-new" value="_">Add resort</option>
+                  		</select>
+                  
+                  		<br />
+                  		<b>{% trans "Area" %}: </b>
+                  		<select id="id_area" class="selectbox" name="area" style="width: 200px;">
+                                  <option value="">All</option>
+                  				{% for area in areas %}
+                  					<option value="{{ area.1 }}" {% if GET.area == area.1 %}selected="selected"{% endif %}>{{ area.0 }}</option>
+                  				{% endfor %}
+                  				<option class="create-new" value="_">Add area</option>
+                  		</select>
+                  </td>
+                  <td>
+                  		<b>{% trans "Hotel" %}: </b>
+                  		<select id="id_hotel" class="selectbox" name="hotel" style="width: 200px;">
+                  			<option value="">All</option>
+                  			{% if GET.resort %}
+                  				{% for hotel in hotels_all %}
+                  					<option value="{{ hotel.id }}" {% if GET.hotel == hotel.id %}selected="selected"{% endif %}>{{ hotel.title }}</option>
+                  				{% endfor %}
+                  				<option class="create-new" value="_">Add hotel</option>
+                  			{% endif %}
+                  		</select>
+                  
+                  		<br />
+                  		<b>{% trans "Supplier" %}: </b>
+                  		<select id="id_supplier" class="selectbox" name="supplier" 
+                  			onchange="filter_form.submit();" style="width: 200px;">
+                                  <option value="">All</option>
+                  				{% for supplier in suppliers %}
+                  					<option value="{{ supplier.pk }}" {% if GET.supplier == supplier.pk|stringformat:"s" %}selected="selected"{% endif %}>{{ supplier }}</option>
+                  				{% endfor %}
+                  		</select>
+                  
+                  		<br />
+                  		<b>{% trans "Allotments" %}: </b>
+                  		<select id="id_allotment" class="selectbox" name="allotments" 
+                  			onchange="filter_form.submit();" style="width: 200px;">
+                                  <option value="all" {% if GET.allotments == 'all' %}selected="selected"{% endif %}>Doesn't matter</option>
+                                  <option value="with_allotments" {% if GET.allotments == 'with_allotments' %}selected="selected"{% endif %}>Show hotels with allotments only</option>
+                  		</select>
+                  </td>
+              </tr>
+          </table>        
+    	</div>
+  </form>
+
+  <div class='div_grey_block connect_to_ratecode' style='display:none'>  
+      <form class="form" method="POST" action="" id="connect_to_ratecode_form">
+        {% csrf_token %}
+        <input type='hidden' id='upall_formula' name='formula'>
+        <input type='hidden' id='rewrite' name='rewrite'>
+      </form>
+      
+          
+      <table id="connect_to_ratecode">
+      <tbody><tr>
+        <td></td>
+        <td>Markup</td>
+        <td>Discount</td>
+      </tr>
+      <tr>
+        <td>Room:</td>
+        <td><input type="text" id="room_markups">%</td>
+        <td><input type="text" id="room_commissions">%</td>
+      </tr>
+      <tr>
+        <td>Extra bed:</td>
+        <td><input type="text" id="eb_markup">%</td>
+        <td><input type="text" id="eb_commission">%</td>
+      </tr>
+      <tr>
+        <td>Meal:</td>
+        <td><input type="text" id="meals_markup">%</td>
+        <td><input type="text" id="meals_commission">%</td>
+      </tr>
+      <tr>
+        <td>Compulsory services:</td>
+        <td><input type="text" id="cs_markup">%</td>
+        <td><input type="text" id="cs_commission">%</td>
+      </tr>
+      </tbody>
+      </table>  
+      <select id='connect_suppliers_to_rc_select'>
+          {% for rate_code in own_rate_codes %}
+              <option value='{{ rate_code.code }}'>{{ rate_code.title }}</option>
+          {% endfor %}
+      </select>
+      <br /><br /> 
+      Rewrite if exist: 
+      <input type="checkbox" class="rewrite_exist" id="rewrite_exist">
+      <br /><br />
+      <p class='filter_title'>
+          <strong>{% trans 'Звездность' %}:</strong>
+      </p>
+      <div class='single_option'>
+        <label>                       
+          <input type="checkbox" class="select_starsforconnect" id="starsforconnect_all" checked>
+          <strong>{% trans 'Выбрать все' %}</strong> 
+        </label>
+      </div>
+      <div class='single_option'>
+        <label>  
+          <input type="checkbox" class="select_starsforconnect" id="starsforconnect_5">
+          <div class="ratings r5 ratings_style2">
+    		     <span class="star1"></span>
+    		     <span class="star2"></span>
+    		     <span class="star3"></span>
+    		     <span class="star4"></span>
+    		     <span class="star5"></span>
+    	    </div>
+        </label> 
+      </div>
+      <div class='single_option'>
+        <label>  
+          <input type="checkbox" class="select_starsforconnect" id="starsforconnect_4">
+          <div class="ratings r4 ratings_style2">
+    		     <span class="star1"></span>
+    		     <span class="star2"></span>
+    		     <span class="star3"></span>
+    		     <span class="star4"></span>
+    		     <span class="star5"></span>
+    	    </div>
+        </label>
+      </div>
+      <div class='single_option'>
+        <label>  
+          <input type="checkbox"  class="select_starsforconnect" id="starsforconnect_3">
+          <div class="ratings r3 ratings_style2">
+    		     <span class="star1"></span>
+    		     <span class="star2"></span>
+    		     <span class="star3"></span>
+    		     <span class="star4"></span>
+    		     <span class="star5"></span>
+    	    </div>
+        </label>
+      </div>
+      <div class='single_option'>
+        <label>  
+          <input type="checkbox"  class="select_starsforconnect" id="starsforconnect_2">
+          <div class="ratings r2 ratings_style2">
+    		     <span class="star1"></span>
+    		     <span class="star2"></span>
+    		     <span class="star3"></span>
+    		     <span class="star4"></span>
+    		     <span class="star5"></span>
+    	    </div>
+        </label>
+      </div>
+          
+      <input type="button" value="Connect selected hotels to selected ratecode" id='connect_suppliers_to_rc_button' style='width:300px;'>
+      <br />
+      <div id='connect_suppliers_to_rc_ajax_response'></div>
+  </div>
+
+  
+  <br />
+  <div class='dashed_line connect_to_ratecode' style='display:none'>&nbsp;</div>  
+  <br />
+  
+  <p style="width:680px; padding-bottom: 20px;">
+      <a href="#" id="select-all">{% trans "Select all" %}</a> | <a href="#" id="unselect-all">{% trans "Cancel selection" %}</a> | 
+      <a id="connect_to_ratecode_href" href="">{% trans "Connect to ratecode" %}</a>
+      <a class="make_publish" href="">{% trans "Make publish" %}</a>
+  </p>  
+  <form id="hotel_list">
+	<div class="hotel-list">
+    
+	  {% for hotel in object_list %}
+    
+		{% with all_hotel_suppliers|get_by_key:hotel.pk as hotel_suppliers %}
+		{% with shared_hotel_suppliers|get_by_key:hotel.pk as hs_rate_codes %}
+		{% if hotel_suppliers or hs_rate_codes %}
+			<img class="switcher" src="{{ MEDIA_URL }}images/expand.gif" onClick="show_hide(this, 'hotel-{{ hotel.pk }}');">
+		{% else %}
+			<div class="empty-img"></div>
+		{% endif %}
+		<div class="hotel-item">
+			<div class="hotel-title">
+				{{ hotel.title }} {{ hotel.stars|default:'' }}<span style="font-weight: normal; color: #a0b7c5">(ID: {{ hotel.id }})</span> 
+			  <br />
+        <small style='color:green;font-weight:normal;font-size:11px'>{{ hotel.country }}/{% for r in hotel.resort.get_ancestors%}  {{ r }}, {% endfor %}{{ hotel.resort }}</small>
+      </div>
+			<div class="hotel-supplier-add">
+				<a href="{% url hotel_supplier_add hotel_pk=hotel.pk %}" class="add-supplier">Add supplier</a>
+			</div>
+      
+			{% if hs_rate_codes and hotel|has_partner_rate_codes:company %}
+			<div class="room-bind">
+				<a href="{% url rooms_bind pk=hotel.pk %}" class="add-supplier" title="Room Bind">RB</a>
+			</div>
+			{% endif %}
+      
+			<div class="clear"></div>
+
+	    <table id="hotel-{{ hotel.pk }}" style="display:none" class='hotel-supplier-list'>
+	    {% for hotel_supplier in hotel_suppliers %}
+      		<tr {% if forloop.first %}class="first"{% endif %}>
+      			<td style="width:600px"> 
+            
+      			<a href="{% url hotel_edit hotel_supplier_pk=hotel_supplier.pk %}"
+      				{% if not hotel_supplier.public_version %}style="color: #ff0000;"{% endif %}
+      			> 
+      				{{ hotel_supplier.supplier.contragent_title }} 
+      			</a>
+            <br />
+      			{% for rate_code in rate_codes|get_by_key:hotel_supplier.pk %}
+            
+      				<a href="{% url rate_code_hotel hs_rate_code_pk=rate_code.pk %}">
+      					<small 
+      						{% if rate_code.public_version %}
+      							style="color:#0f741a"
+      						{% else %}
+      							style="color:#ff0000"
+      						{% endif %}
+      					>
+      						{{ rate_code.rate_code.title }} RC-{{ rate_code.rate_code.code }}</small>
+          
+      				</a>{% if not forloop.last %},{% endif %}
+      			{% endfor %}
+      			</td>
+      			<td id="childpolicy_{{ hotel_supplier.pk }}"  style="width:25px; text-align: center;">{% if hotel_supplier.childpolicy %}+{% endif %}</td>
+      			<td><input name="hotels" style="width:25px;" class='hs' value="{{ hotel_supplier.pk }}" type="checkbox"></td>
+          </tr>
+	    {% endfor %}
+                                   
+	    {% for hs_rate_code in hs_rate_codes %}
+    		  <tr {% if forloop.first %}class="first"{% endif %}>
+          
+        			<td style="width:600px">
+                 
+        				<a href="{% url shared_rate_code_hotel_supplier hs_rate_code_pk=hs_rate_code.pk %}">
+                    {% get_own_contragent_for_company request.user.company hs_rate_code.rate_code.company %}
+              	</a>
+                <br />                 
+                         
+        				{% for hs_rc in shared_rate_codes|get_by_key:hs_rate_code.hotel_supplier_id %}       
+        					{% if hs_rc.parent.id == hs_rate_code.id %}
+                  <a href="{% url rate_code_hotel hs_rate_code_pk=hs_rc.pk %}">
+        						<small>{{ hs_rc.rate_code.title }} RC-{{ hs_rc.rate_code.code }}
+                    {% if not hs_rate_code.actual_hotel_supplier_rate_code %}
+                      Not publicated
+                    {% endif %} 
+                    
+                    {% if not hs_rate_code.actual_hotel_supplier_rate_code %}
+                        Not publish
+                    {% endif %}   
+                    </small>
+        					</a>
+                  &nbsp;&nbsp;
+                  {% endif %}                 
+        				{% endfor %}
+                
+                {% regroup hs_rate_code.get_children by id as hs_rc_own %}
+                {% if hs_rc_own %}
+                    <br /><br />
+                    <small style='color:green;display:inline-block;border-bottom:1px #999 dotted'>Connected to my rc:</small>
+                    <small style='color:green'>
+                    {% for hs_rc_dct in hs_rc_own %}
+                        {% for hs_rc in hs_rc_dct.list %}
+                            {% if hs_rc.company == company %}
+                              {{ hs_rc.rate_code.code }} {% if not hs_rc.actual_hotel_supplier_rate_code %}<span style='font-weight:bold;color:#ff0000'>not published</span>{% endif %}
+                              &nbsp;&nbsp;{% if not forloop.last %},{% endif %}
+                            {% endif %}
+                        {% endfor %}
+                    {% endfor %}
+                    </small>
+                {% endif %}  
+                               
+        			</td>
+        			<td style="width:50px; color: #FF0000;">
+        			   {{ hs_rate_code.rate_code.code }}
+        			</td>
+        			<td><input name="hotels" style="width:25px;" class='hsrc' value="{{ hs_rate_code.id }}" type="checkbox"></td>
+    		  </tr>
+	    {% endfor %}
+
+	  </table>
+	  </div>
+	  {% endwith %}
+	  {% endwith %}
+	  {% endfor %}
+
+	</div>
+
+  </form>
+  
+  <br />
+  <br />
+  {% if page_obj.has_other_pages %}
+    <form class="form_pages" action="" method="post">
+      {% csrf_token %}
+      <ul class="pages">
+        {% if page_obj.has_previous and page_obj.previous_page_number != 1 %}
+          <li>
+            <a href="{% url hotel_list page=1 %}{% if params %}?{{ params }}{% endif %}">1</a>
+          </li>
+          {% if page_obj|has_first_three_dots %}
+            <span>...</span>
+          {% endif %}
+        {% endif %}
+        {% if page_obj.has_previous %}
+          <li>
+            <a href="{% url hotel_list page=page_obj.previous_page_number %}{% if params %}?{{ params }}{% endif %}">{{ page_obj.previous_page_number }}</a>
+          </li>
+        {% endif %}
+        {{ form_pages.page }}
+        {% if page_obj.has_next %}
+          <li>
+            <a href="{% url hotel_list page=page_obj.next_page_number %}{% if params %}?{{ params }}{% endif %}">{{ page_obj.next_page_number }}</a>
+          </li>
+        {% endif %}
+        {% if page_obj.has_next and page_obj.next_page_number < page_obj.paginator.num_pages %}
+          {% if page_obj|has_last_three_dots %}
+            <span>...</span>
+          {% endif %}
+          <li>
+            <a href="{% url hotel_list page=page_obj.paginator.num_pages %}{% if params %}?{{ params }}{% endif %}">{{ page_obj.paginator.num_pages }}</a>
+          </li>
+        {% endif %}
+      </ul>
+    </form>
+    <!--<ul class="pages">
+        {% for page in page_obj.page_range %}
+            {% ifequal current_page_num page %}
+                <li class="active">{{ page }}</li>
+            {% else %}
+                <li><a href="{% url hotel_list page=page %}{% if params %}?{{ params }}{% endif %}">{{ page }}</a></li>
+            {% endifequal %}
+        {% endfor %}
+    </ul>-->
+  {% endif %}
+  <div id="commands-res"></div>
+  
+  <p class="form" style="width: 1030px;">    	
+    	<b>Command:</b> <input type="text" name="command" id="id_command" style="width:680px;"> 
+    	<input type="button" value="Submit" id="coomand_submit">
+  </p>
+  
+  
+  
+  <a id="imaginary-link" href="#" style="display:none"></a>
+  
+{% endblock %}
+
+
+
+

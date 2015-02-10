@@ -1,0 +1,545 @@
+{% extends "profile_version_15082012/tours_base.html" %}
+{% block additional_head %}
+    <style>
+
+    .hotel {
+        font-weight: bold;
+        font-size: 14px;
+        margin: 0;
+    }
+
+    .single_hotel{
+        display: inline-block;
+        width: 30%;
+        vertical-align: top;
+    }
+    .row {
+        margin-bottom: 15px;
+    }
+    .row_p{
+        display: inline-block;
+        margin-top: 10px;
+        margin-right: 10px; 
+        vertical-align: top;
+  
+    }
+    .row strong{
+        display: inline-block;
+        width: 32%;
+        font-size: 16px;
+        
+    }
+    .wrapper {
+      border-spacing:5px
+    }
+    .block {
+      width: 160px;
+      height: 140px;
+      margin: 3px;
+      cursor: pointer;
+      padding: 25px;
+      text-align: center;
+      color: white;
+      font-weight: bold;
+      font-size: 18px;
+      display: inline-block; 
+      /* word-break: break-all; */
+      vertical-align: middle;
+    }
+    .descr {
+      display: none;
+      font-size: 16px;
+    }
+    .red {
+      background-color: #FCA74D;
+      transition: 0.5s;
+    }
+    .red:hover {
+      background-color: #F15A23;
+      transition: 0.5s;
+    }
+    .blue {
+      background-color: #97D5F2;
+      transition: 0.5s;
+    }
+    .blue:hover {
+      background-color: #326C9E; 
+      transition: 0.5s; 
+    }
+    .green {
+      background-color: #92CC47;
+      transition: 0.5s;
+    }
+    .green:hover{
+      background-color: #65B300;
+      transition: 0.5s;
+    }
+    .list_row {
+       /*display:table-row;*/
+    }
+    .block:hover .descr {
+      display: block;
+      transition: 0.5s;
+    }
+    .block:hover .title {
+      display: none;
+      transition: 0.7s;
+    } 
+    .title{
+      margin: 0;
+    }
+    #descriptions div {
+      display:none;
+      background-color: #ffe2bd;
+      padding:15px;
+      margin-top: 15px;
+      border-radius: 5px;
+    }
+    #select {
+      width: 400px;
+      margin-top:15px;
+    }
+    #select_menu{
+      width:100%
+    }
+    #head_text{
+      font-family: "myriadpro",sans-serif;
+      font-size:20px;
+      color:black;
+      text-align:center;
+      margin: 5px 0 5px o;
+    }
+    #response_wrapper {
+      min-height: 100px;
+      background-color: #EDF8FD;
+      padding: 20px;
+      margin-top: 20px;
+      display: none;
+      border-radius: 5px;
+    }
+    #ajax_loader_icon {
+      width: 30px;
+    }
+    </style>
+
+
+  
+    <script>
+    $(function(){
+        var container = $('#response_wrapper')
+        $("#select").change(function (e) {  
+          $("#select option:selected").each(function () {
+               if ($(this).attr("value")=='resort_sync'){
+                                          container.html('');
+                                          e.preventDefault();
+                                          container.load('/regions/resort_sync/', function(){
+                                              $(this).fadeIn();     
+                                            })
+                          }
+               if ($(this).attr("value")=='hotel_sync'){
+                                          container.html('');
+                                          e.preventDefault();
+                                          container.load('/profile/hotels/hotel_sync/', function(){
+                                              $(this).fadeIn();     
+                                            })
+                          }
+               if ($(this).attr("value")=='resort_analytic_list'){
+                              container.html('');
+                              e.preventDefault();
+                              container.load('/regions/resort_analytic_list/', function(){
+                              $(this).fadeIn();
+                                            })
+                          }
+               if ($(this).attr("value")=='stat_hotels'){
+                              container.html('');
+                              e.preventDefault();
+                              container.load('/profile/hotels/sync_hotels_list/', function(){
+                              $(this).fadeIn();
+                                            })
+                          }
+               if ($(this).attr("value")=='sync_hotels'){
+                              container.html('');
+                              e.preventDefault();
+                              container.load('/profile/hotels/sync_hotels_booking/', function(){
+                              $(this).fadeIn();
+                                            })
+                          }
+               if ($(this).attr("value")=='sync_res_names'){
+                              container.html('');
+                              e.preventDefault();
+                              container.load('/profile/hotels/sync_hotels/', function(){
+                              $(this).find('#show_pairs').val('Выполнить').attr('id', 'sync_res_names_submit');
+                              $(this).fadeIn();
+                                            })
+                          }
+               if ($(this).attr("value")=='add_districts'){
+                              container.html('');
+                              e.preventDefault();
+                              container.load('/profile/hotels/sync_hotels/', function(){
+                              $(this).find('#show_pairs').val('Выполнить').attr('id', 'sync_districts');
+                              $(this).fadeIn();
+                                            })
+                          }
+               if ($(this).attr("value")=='sync_stars'){
+                              container.html('');
+                              e.preventDefault();
+                          }
+               if ($(this).attr("value")=='fill_booking_stars'){
+                              container.html('');
+                              e.preventDefault();
+                          }
+               if ($(this).attr("value")=='get_regions'){
+                              container.html('');
+                              e.preventDefault();
+                              container.load('/profile/hotels/sync_hotels/', function(){
+                              $(this).find('#show_pairs').val('Выполнить').attr('id', 'get_regions_submit');
+                              $(this).fadeIn();
+                                            })
+                          }
+               if ($(this).attr("value")=='load_hotels'){
+                              container.html('');
+                              e.preventDefault();
+                              container.load('/profile/hotels/sync_hotels/', function(){
+                                  $(this).find('#show_pairs').val('Выполнить').attr('id', 'load_hotels_from_booking');
+                                  $(this).fadeIn();
+                              })
+                          }
+               if ($(this).attr("value")=='stat_country'){
+                              container.html('');
+                              e.preventDefault();
+                              container.load('/profile/hotels/stat_country/', function(){
+                              $(this).fadeIn();
+                                            })
+                          }   
+                      });
+                    }) ;                                                                                                                                                                        
+        /*$('#resort_sync').click(function(e){
+            e.preventDefault();
+            container.load('/regions/resort_sync/', function(){
+                $(this).fadeIn();
+            })        
+        });
+        $('#resort_analytic_list').click(function(e){
+            e.preventDefault();
+            container.load('/regions/resort_analytic_list/', function(){
+                $(this).fadeIn();
+            }) 
+        });
+        $('#stat_hotels').click(function(e){
+            e.preventDefault();
+            container.load('/profile/hotels/sync_hotels_list/', function(){
+                $(this).fadeIn();
+            })
+        });
+        $('#sync_hotels').click(function(e){
+            e.preventDefault();
+            container.load('/profile/hotels/sync_hotels/', function(){
+                $(this).fadeIn();
+            })
+        });
+        $('#sync_res_names').click(function(e){
+            e.preventDefault();
+            container.load('/profile/hotels/sync_hotels/', function(){
+                $(this).find('#show_pairs').val('Выполнить').attr('id', 'sync_res_names_submit');
+                $(this).fadeIn();
+            })
+            
+        });
+        $('#add_districts').click(function(e){
+            e.preventDefault();
+            container.load('/profile/hotels/sync_hotels/', function(){
+                $(this).find('#show_pairs').val('Выполнить').attr('id', 'sync_districts');
+                $(this).fadeIn();
+            })
+        });
+        $('#sync_stars').click(function(e){
+            e.preventDefault();
+            var with_form = false;
+            load_cron_results($(this), 'sync_stars', with_form);
+        });
+        $('#fill_booking_stars').click(function(e){
+            e.preventDefault();
+            var with_form = false;
+            load_cron_results($(this), 'fill_booking_stars', with_form);
+        });
+        $('#get_regions').click(function(e){
+            e.preventDefault();
+            container.load('/profile/hotels/sync_hotels/', function(){
+                $(this).find('#show_pairs').val('Выполнить').attr('id', 'get_regions_submit');
+                $(this).fadeIn();
+            })
+        });
+        $('#load_hotels').click(function(e){
+            e.preventDefault();
+            container.load('/profile/hotels/sync_hotels/', function(){
+                $(this).find('#show_pairs').val('Выполнить').attr('id', 'load_hotels_from_booking');
+                $(this).fadeIn();
+            })
+        });  */
+    });   
+    </script>
+    
+    
+    <script>
+  $(function(){
+      $('#show_pairs').live('click', function(e){
+          $(this).die('click');
+          e.preventDefault();
+          var obj = $(this);
+          var data = obj.closest('form').serialize();  
+          $.ajax({
+            type: 'POST',
+            url: '{% url sync_hotels %}',
+            data: data,
+            beforeSend: function(){
+                $('#ajax_loader_icon').show();
+            },
+            complete: function(){
+                $('#ajax_loader_icon').hide();
+            },
+            success: function(response){
+                obj.closest('#response_wrapper').html(response);   
+            },
+            error: function(jqXHR, textStatus, errorThrown){
+              for(i in jqXHR){
+	             console.log(jqXHR[i]);
+              }
+            },
+          });
+          
+      });
+      $('#sync_res_names_submit').live('click', function(e){
+          e.preventDefault();
+          var with_form = true
+          load_cron_results($(this), 'sync_res_names', with_form);          
+      });
+      
+      $('#sync_districts').live('click', function(e){
+          e.preventDefault();
+          var with_form = true
+          load_cron_results($(this), 'sync_districts', with_form);          
+      }); 
+      
+      $('#get_regions_submit').live('click', function(e){
+          e.preventDefault();
+          var with_form = true;
+          load_cron_results($(this), 'get_regions', with_form);
+      });
+      
+      $('#load_hotels_from_booking').live('click', function(e){
+          e.preventDefault();
+          var with_form = true;
+          load_cron_results($(this), 'load_hotels_from_booking', with_form);
+      });               
+  });
+function load_cron_results(obj, action, with_form){
+    obj.die('click');
+    if (with_form){
+        var data = obj.closest('form').serialize();
+        data += '&action='+action
+    }else{
+        var csrftoken = getCookie('csrftoken');
+        var data = 'csrfmiddlewaretoken='+ csrftoken +'&action='+action
+    }    
+    $.ajax({
+      type: 'POST',
+      url: '{% url cron_operations %}',
+      data: data,
+      beforeSend: function(){
+          $('#ajax_loader_icon').show();
+              },
+      complete: function(){
+          $('#ajax_loader_icon').hide();
+      },
+      success: function(response){
+          obj.closest('#response_wrapper').html(response);   
+      },
+      error: function(jqXHR, textStatus, errorThrown){
+        for(i in jqXHR){
+         console.log(jqXHR[i]);
+        }
+      },
+    });    
+}
+function getCookie(name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie != '') {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+            var cookie = jQuery.trim(cookies[i]);
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+} 
+</script>
+
+
+{% endblock %}
+
+{% block page_title %}Синхронизация с отелями системы Booking.com{% endblock %}
+{% block profile_content %}   
+{% load i18n %}
+    
+    <div class='wrapper'>
+      <div class='list_row'>  
+          <div id="head_text">Синхронизация с отелями системы Booking.com</div>
+        <!--sync_booking_hotels()-->
+        <!--<div class='block red' id='load_hotels'>
+            <p class='title'>
+                {% trans 'Синхр. отели с Booking' %}
+            </p>
+            <p class='descr'>
+                {% trans 'Перенос отелей из Booking' %}
+            </p>
+        </div>  -->
+        <!--Перенос Regions из booking в resorts cron fill_resort_parent()
+        <div class='block blue' id='get_regions'>
+            <p class='title'>
+                {% trans 'Синхронизируем Regions из booking в Unihotel resorts' %}
+            </p>
+            <p class='descr'>
+                {% trans 'Добавляем новые резорты из регионов booking' %}
+            </p>
+    
+        </div>
+        <!--Заполнение звездности для отелей Booking имеющих связь fill_hotel_stars_info()-->
+       <!-- <div class='block green' id='fill_booking_stars'>
+            <p class='title'>
+                {% trans 'Заполнить звездность отелям Booking' %}
+            </p>
+            <p class='descr'>
+                {% trans 'Пробегаем по связанным отелям Booking и обновляем информацию по классам' %}
+            </p>    
+        </div>
+        <!--Заполнение звездности из таблицы Booking cron update_hotel_stars_info()-->
+       <!-- <div class='block red' id='sync_stars'>
+            <p class='title'>
+                {% trans 'Синхронизируем звездность с отелями Booking' %}
+            </p>
+            <p class='descr'>
+                {% trans 'Заполнение звездности отелей значениями из таблицы Booking' %}
+            </p>    
+        </div>
+      </div><!--end list_row-->
+     <!-- <div class='list_row'>
+        <!-- Добавляем районы в таблицу resorts regions.cron.add_districts_to_resorts() -->
+      <!--  <div class='block blue' id='add_districts'>
+            <p class='title'>
+                Синхронизируем districts с Booking
+            </p>
+            <p class='descr'>
+                Запрашиваем районы с booking api и добавляем их в Resorts
+            </p>    
+        </div>
+        <!-- Добавляем названия resorts на разных языках regions.cron.add_multilang_resort_title() -->
+       <!-- <div class='block green' id='sync_res_names'>
+            <p class='title'>
+                Синхронизируем названия resorts с Booking
+            </p>
+            <p class='descr'>
+                Запрашиваем названия связанных городов на разных языках и записываем их в resorts
+            </p>    
+        </div>
+         <!-- Переход на ручную синхронизацию отелей hotels.views.sync_hotels() -->
+       <!-- <div class='block red' id='sync_hotels'>
+            <p class='title'>
+                Синхронизируем отели Booking вручную
+            </p>
+            <p class='descr'>
+                Переходим на страницу ручной синхронизации отелей
+            </p>    
+        </div>
+        <!-- Просмотр списка синхронизированных отелей 
+        <a href = ' url sync_hotels_list country_link=country_link  '>Statistics list</a>
+        -->
+      <!--  <div class='block blue' id='stat_hotels'>
+            <p class='title'>
+                Статистика по отелям
+            </p>
+            <p class='descr'>
+                Список соответствия с Booking отелей
+            </p>    
+        </div>
+      </div><!--end list_row-->
+    <!--  <div class='list_row'>
+        <!-- Просмотр списка синхронизированных регионов
+        <a href = ' url resort_analytic_list  '>Statistics list</a>
+        -->
+      <!--  <div class='block green' id='resort_analytic_list'>
+            <p class='title'>
+                Статистика по Resorts
+            </p>
+            <p class='descr'>
+                Список соответствия Resorts
+            </p>    
+        </div>
+        <!-- Синхронизация регионов вручную-->       
+          <!--  <div class='block red' id='resort_sync'>
+                <p class='title'>
+                    Ручная синхронизация Resorts 
+                </p>
+                <p class='descr'>
+                    Подстановка нового Resort вместо старого
+                </p>    
+            </div>
+      </div><!--end list_row-->
+
+    </div><!--end wrapper-->   
+    <div style='text-align:center'>
+        <img src='{{ STATIC_URL }}developers_icons/ajax-loader.gif' id="ajax_loader_icon" style='display:none'> 
+    </div>  
+    <div id="select_menu">      
+        <label for="select">{% trans 'Выберите операцию: ' %}</label> 
+        <select id="select" name="select">
+            <option selected='' value="">------------</option>
+            <option id='stat_country'  value="stat_country">{% trans 'Статистика по странам' %}</option>
+            <option id='load_hotels' value="load_hotels">{% trans 'Синхр. отели с Booking' %}</option>
+            <option id='get_regions' value="get_regions">{% trans 'Синхронизируем Regions из booking в Unihotel resorts' %}</option>
+            <option id='fill_booking_stars' value='fill_booking_stars'>{% trans 'Заполнить звездность отелям Booking' %}</option>
+            <option id='sync_stars' value='sync_stars'>{% trans 'Синхронизируем звездность с отелями Booking' %}</option>
+            <option id='add_districts' value='add_districts'>{% trans 'Синхронизируем districts с Booking ' %}</option>
+            <option id='sync_res_names' value='sync_res_names'>{% trans 'Синхронизируем названия resorts с Booking ' %}</option>
+            <option id='sync_hotels' value='sync_hotels'>{% trans 'Синхронизируем отели Booking вручную ' %}</option>
+            <option id='stat_hotels' value='stat_hotels'>{% trans 'Статистика по отелям ' %}</option>
+            <option id='resort_analytic_list' value='resort_analytic_list'>{% trans 'Статистика по Resorts ' %}</option>
+            <option id='resort_sync' value='resort_sync'>{% trans 'Ручная синхронизация Resorts ' %}</option>
+            <option id='hotel_sync' value='hotel_sync'>{% trans 'Слияние отелей ' %}</option>
+        </select>
+        <div id="descriptions">
+              <div id="description_stat_country">{% trans 'Формирование сводного отчета по синхронизированным отелям между БД unihotel.org и Booking.com в каждой стране' %}</div>
+	            <div id="description_load_hotels">{% trans 'Перенос отелей из Booking' %}</div>
+	            <div id="description_get_regions">{% trans 'Добавляем новые резорты из регионов booking' %}</div>
+	            <div id="description_fill_booking_stars">{% trans 'Пробегаем по связанным отелям Booking и обновляем информацию по классам' %}</div>
+              <div id="description_sync_stars">{% trans 'Заполнение звездности отелей значениями из таблицы Booking' %}</div>
+              <div id="description_add_districts">{% trans 'Запрашиваем районы с booking api и добавляем их в Resorts' %}</div>
+              <div id="description_sync_res_names">{% trans 'Запрашиваем названия связанных городов на разных языках и записываем их в resorts' %}</div>
+              <div id="description_sync_hotels">{% trans 'В даном разделе нужно в ручном режиме проставить соответствие отелей в нашей Базе данных соответствующим отелям в базе данных букинга' %}</div>
+              <div id="description_stat_hotels">{% trans 'Список соответствия с Booking отелей' %}</div>
+              <div id="description_resort_analytic_list">{% trans 'Список соответствия Resorts' %}</div>
+              <div id="description_resort_sync">{% trans 'Подстановка нового Resort вместо старого' %}</div>
+              <div id="description_hotel_sync">{% trans 'Подстановка нового отеля вместо старого' %}</div>
+	      </div> 
+    </div>
+    <div id='response_wrapper'>  
+        <div id='country_chose_form'>
+            <form action='' class="chose_country" method="POST">
+                {% csrf_token %}
+                {{ form }}
+                <input type='submit' value='Выполнить'>
+            </form>
+        </div>  
+           
+    </div>
+
+<script type="text/javascript">
+    $('#select').change(function () {
+        $('#descriptions div').hide();
+        $('#description_'+this.value).show();
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,67 @@
+{% load mptt_tags %} 
+{% block additional_head %}
+  <style>
+      #public{
+       width:45%;
+       float:left; 
+    }
+    #not_public{
+       width:45%; 
+       float:right;
+    }
+  
+  </style>
+ <script>
+ $(function(){
+      $('#public,#not_public').click(function(e){
+          //$(this).parent().hide(); 
+          e.preventDefault();
+          var obj = $(this);
+          var public_input = obj.parent().find("#public");
+          var not_public_input = obj.parent().find("#not_public");
+          var data = obj.closest('form').serialize(); 
+          var country = obj.closest('form').find("#id_country option:selected").val();
+          
+          if (obj.get(0)==$('#public').get(0)){
+              var hotel_public = 'hotel_public';
+          }
+          else{
+              var hotel_public = 'hotel_not_public';
+          };
+          $.ajax({
+            type: 'POST',
+            url: '{% url sync_hotels_booking %}',
+            data: {
+                    csrfmiddlewaretoken: '{{ csrf_token }}' , 
+                    country: country ,
+                    hotel_public: hotel_public
+                                    } ,
+            beforeSend: function(){
+                $('#ajax_loader_icon').show();
+            },
+            complete: function(){
+                $('#ajax_loader_icon').hide();
+            },
+            success: function(response){
+                obj.closest('#response_wrapper').html(response);  
+                $('#public,#not_public').show(); 
+            },
+            error: function(jqXHR, textStatus, errorThrown){
+              for(i in jqXHR){
+	             console.log(jqXHR[i]);
+              }
+            },
+          }); 
+        }); 
+        
+  });
+     </script>
+{% endblock %}
+ <div class="forms">
+<form action='' class="chose_country_sync" method="POST" id='sync_hotels_form'>
+    {% csrf_token %}
+    {{ form }}<br>
+    <input type='submit' value='Cписок по публичным отелям' id='public'>
+    <input type='submit' value='Cписок по непубличным отелям' id='not_public'>
+</form>
+</div>

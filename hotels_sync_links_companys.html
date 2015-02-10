@@ -1,0 +1,100 @@
+
+  {% block additional_head %}
+     <style>  
+    strong{
+      font-weight: bold;
+      display: inline-block;
+      width: 28%; 
+      font-size: 12px;
+      margin: 15px 0; 
+    }
+    .col {
+      display: inline-block;
+      width: 32%;   
+    }
+    .col_big {
+      display: inline-block;
+      width: 48%;
+      
+    }
+    .status_col {
+      display: inline-block;
+      width: 30% !important;
+    }
+    .status_col_small {
+      display: inline-block;
+      width: 9.5% !important;
+      text-align: center;
+    }
+    .last_col {
+        width: 20%;
+    }
+    .count{
+      font-weight: bold;
+      margin-right: 10px;
+    }
+    .odd{
+      background-color: #F4F4F4;
+    }
+    .in_work {
+      color: rgb(77, 150, 77);
+
+    }
+    .linked {
+      color: #FB9F27;
+    }
+    .in_work,
+    .linked {
+      font-weight: bold;
+      
+    }
+    .resort_pk{
+        font-weight: bold;
+    }
+    .company_name{
+        font-size:1.2em;
+        color:black;
+    }
+    .model_name{
+        margin-top:0;
+        vertical-align:top;
+    }
+    #stat_country_head {
+      padding:5px;
+      font-size:16px;
+      font-weight: bold;
+      font-family:Tahoma,"Geneva CY",sans-serif;
+      color: #5D5D5D;
+    }
+    #stat_country_table{
+      width:100%;
+      text-align:center;
+    }
+    #stat_country_head_little{
+       font-size:14px;
+    }
+    </style>
+    
+    {% endblock %}
+    {% for company,models in company_list.items %}
+          
+              <div class="row">
+                  <p class="company_name">{{ company }}  </p>
+                  
+                  
+                    {% for model in models %}
+                   <div class="row ">
+                  <div class='col_big model_name'>
+                      <p>{{ model.name }} </p>
+                  </div>  
+                  <div class="col_big"> 
+                       {{ model.id }}
+                      
+                  </div>     
+              </div> 
+                   
+              </div> 
+              
+              
+      {% endfor %}
+            {% endfor %}

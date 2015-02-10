@@ -1,0 +1,406 @@
+
+{% load mptt_tags %} 
+{% block additional_head %}
+     <style>  
+    strong{
+      font-weight: bold;
+      display: inline-block;
+      width: 28%; 
+      font-size: 12px;
+      margin: 15px 0; 
+    }
+    .col {
+      display: inline-block;
+      width: 32%;   
+    }
+    .col_big {
+      display: inline-block;
+      width: 30%;
+      margin:0;   
+    }
+    .status_col {
+      display: inline-block;
+      width: 10% !important;
+    }
+    .status_col_small {
+      display: inline-block;
+      width: 9.5% !important;
+      text-align: center;
+    }
+    .last_col {
+        width: 20%;
+    }
+    .count{
+      font-weight: bold;
+      margin-right: 10px;
+    }
+    .odd{
+      background-color: #F4F4F4;
+    }
+    .in_work {
+      color: rgb(77, 150, 77);
+
+    }
+    .linked {
+      color: #FB9F27;
+    }
+    .in_work,
+    .linked {
+      font-weight: bold;
+      
+    }
+    .resort_pk{
+        font-weight: bold;
+    }
+    #country_chose_form{
+       width:45%;
+       float:left; 
+    }
+    #stat_form{
+       width:45%; 
+       float:right;
+    }
+    #stat_country_head {
+      padding:5px;
+      font-size:16px;
+      font-weight: bold;
+      font-family:Tahoma,"Geneva CY",sans-serif;
+      color: #5D5D5D;
+    }
+    #stat_country_table{
+      width:100%;
+      text-align:center;
+    }
+    #stat_country_head_little{
+       font-size:14px;
+    }
+    .stats{
+        clear: both;
+    }
+    </style>
+    
+    <script>
+      $(function(){
+          var  loader_icon= '<img src='+{{ STATIC_URL }}+'developers_icons/ajax-loader.gif class="ajax_loader_icon">';
+          var ajax_request;
+          var ajax_request_one;
+          var select=$(this).find("#select");
+          
+          // прерывание запросов  ajax_request и ajax_request_one  
+          select.change(function (e) { 
+             abort_ajax(ajax_request);
+             abort_ajax(ajax_request_one);
+          });
+          
+          // СТАТИСТИКА ПО ВСЕМ СТРАНАМ
+          $('#show_pairss').click(function(e){
+              $('.ajax_loader_icon').hide();
+              
+              abort_ajax(ajax_request_one);       //прерывание запроса ajax_request_one
+              
+              e.preventDefault();
+              obj = $(this);
+              $(".row").html('');                     
+              begin = 0;                             // для вывода первой строки
+              loader_icon= '<img src='+{{ STATIC_URL }}+'developers_icons/ajax-loader.gif class="ajax_loader_icon">' 
+              get_me_stat(begin)
+              function get_me_stat(begin){   
+              ajax_request=$.ajax({                // запрос ajax_request. выводит в json формате строки, отрендеренные render_to_string
+                  type: 'POST',
+                  url: '{% url stat_country %}',
+                  dataType: "json",
+                  data: {
+                          csrfmiddlewaretoken: '{{ csrf_token }}' , 
+                          begin: begin 
+                                          } ,
+                  beforeSend: function(){ 
+                  if (begin==0){
+                    $('#show_pairss').after(loader_icon);};
+                  },     
+                  complete: function(){ 
+                  },
+                  success: function(response){
+                    if (response.length > 0) {
+                        if (begin==0){
+                            $("#response_wrapper").append( response);
+                            response=0;
+                            begin = 1;
+                            get_me_stat(begin);}
+                        else {                                    
+                        $("#response_wrapper").append( response);
+                        response=0;
+                        begin=begin+1;
+                        get_me_stat(begin);            // начало рекурсии
+                        };               
+                    }
+                    else{
+                        $('.ajax_loader_icon').hide();
+                        return; 
+                    }; 
+                  },
+                  error: function(jqXHR, textStatus, errorThrown){
+                    for(i in jqXHR){
+      	              console.log(jqXHR[i]);
+                    }
+                  },
+              });   
+            };   
+          });   
+          
+          // СТАТИСТИКА ПО ВЫБРАННОЙ СТРАНЕ
+          $('#chose_country').click(function(e){
+              $('.ajax_loader_icon').hide();
+              
+              abort_ajax(ajax_request);              //прерывание запроса ajax_request
+              
+              e.preventDefault();
+              obj = $(this);
+              $(".row").html('');
+              data = $(this).closest('form').serialize();        // данные для отправки берем из формы я выбором страны
+              loader_icon= '<img src='+{{ STATIC_URL }}+'developers_icons/ajax-loader.gif class="ajax_loader_icon">'  
+              ajax_request_one=$.ajax({   
+                  type: 'POST',
+                  url: '{% url stat_country %}',
+                  dataType: "json",
+                  data: data ,
+                  beforeSend: function(){ 
+                    $('#show_pairss').after(loader_icon);
+                  },
+                  complete: function(){ 
+                    $('.ajax_loader_icon').hide();
+                  },
+                  success: function(response){
+                    $("#response_wrapper").append( response);                               
+                  },
+                  error: function(jqXHR, textStatus, errorThrown){
+                    for(i in jqXHR){
+      	              console.log(jqXHR[i]);
+                    }
+                  },
+              });  
+          }); 
+      
+          // ПЕРЕХОД НА "Синхронизируем отели Booking вручную"
+          var container=$(this).find("#response_wrapper");
+          var unique= $(".hotel_unihotel_unique");
+
+              unique.live('click', function(e){            // клик по ссылке  hotel_unihotel_unique
+              
+              container.prev().find("#select").find("#sync_hotels").attr('selected',true);
+              
+              abort_ajax(ajax_request);        //прерывание запросов ajax_request и ajax_request_one
+              $('.ajax_loader_icon').hide();
+              
+              abort_ajax(ajax_request_one);
+              
+              e.preventDefault();
+              obj = $(this).parents(".even,.odd").find(".country_iso");      // находим столбец country_iso для указанной ссылки 
+              $('.forms,.row').hide();
+              country_iso = obj.text();                                 // выбираем текстовое значение country_iso
+              $.ajax({   
+                  type: 'POST',
+                  url: '{% url stat_country %}',                       // сначала должны получить id страны
+                  dataType: "json",
+                  data:  {
+                          csrfmiddlewaretoken: '{{ csrf_token }}' , 
+                          country_iso: country_iso 
+                                          } ,
+                  beforeSend: function(){ 
+                    $("#response_wrapper").append(loader_icon); 
+                  },
+                  complete: function(data){ 
+                  },
+                  success: function(response){
+                     var country_id=response;
+                     redirect_sync_booking(country_id);               // передаем id
+                  },
+                  
+                  error: function(jqXHR, textStatus, errorThrown){
+                    for(i in jqXHR){
+      	              console.log(jqXHR[i]);
+                    }
+                 },  
+              });  
+          });    
+          
+          
+          function redirect_sync_booking(country_id){         // функция отправки заспроса на  sync_hotels с country_id
+              $('.ajax_loader_icon').hide();
+              var from_stat_country=true;
+               
+               $.ajax({ 
+                  type: 'POST',
+                  url: '{% url sync_hotels_booking %}',
+                  data: {
+                          csrfmiddlewaretoken: '{{ csrf_token }}' , 
+                          country: country_id,
+                          from_stat_country:from_stat_country
+                                          } ,
+                  beforeSend: function(){ 
+                      $("#response_wrapper").append(loader_icon); 
+                  },
+                  complete: function(data){ 
+                    $('.ajax_loader_icon').hide();
+                  },
+                  success: function(response){
+                    $("#response_wrapper").append( response);                               
+                  },
+                  
+                  error: function(jqXHR, textStatus, errorThrown){
+                    for(i in jqXHR){
+      	            console.log(jqXHR[i]);
+                    }
+                  },  
+               });  
+          }; 
+          
+          function abort_ajax(ajax_var){
+              if (ajax_var!==undefined){
+                 ajax_var.abort();
+              };
+          };
+                    
+});
+
+</script>
+    </script>
+{% endblock %}
+ <div class="forms">
+        <div id='country_chose_form'>
+            <form action='' class="chose_country" method="POST">
+                {% csrf_token %}
+                <input type='submit' value='Статистика по стране' id='chose_country'>
+                {{ form }}
+            </form>
+        </div>  
+  <div id='stat_form'>
+  <form action='' class="" method="POST">
+      {% csrf_token %}
+      <input type='submit' value='Статистика по всем странам' id='show_pairss'>
+    </form>
+   </div> 
+   </div> 
+    
+      <br>        
+    {% if list_stat_country %}
+     <div class="stats">
+    <div class = 'row'>
+    <table id="stat_country_table" width=100%>
+                   <tr>
+                         <td colspan=5 id="stat_country_head" width="30%">Страна</td>
+                         <td colspan=2 id="stat_country_head" width="10%">ISO</td>
+                         <td colspan=3 id="stat_country_head" width="30%">Отели Unihotel</td>
+                         <td colspan=3 id="stat_country_head" width="30%">Отели Booking</td>
+                   </tr>
+                   <tr>
+                         <td colspan=5 id="stat_country_head"></td>  
+                         <td colspan=2 id="stat_country_head"></td>
+                         <td id="stat_country_head_little">Всего</td>
+                         <td id="stat_country_head_little">Синх</td>
+                         <td id="stat_country_head_little">Уник</td>
+                         <td id="stat_country_head_little">Всего</td>
+                         <td id="stat_country_head_little">Синх</td>
+                         <td id="stat_country_head_little">Уник</td>
+                   </tr>
+            </table>    
+            </div> 
+           
+          {% for k,country in list_stat_country.items %}
+
+              <div class="row {% if forloop.counter|divisibleby:2 %}even{% else %}odd{% endif %}">
+                  <div class='col_big'>
+                      <span class="count">
+                          {{ forloop.counter }}
+                      </span>
+                          {{ country.country_title }} 
+                  </div>  
+                  <div class="status_col_small"> 
+                      {% if country.country_iso %}
+                       <span class="in_work">
+                           {{ country.country_iso }}
+                       </span>
+                      {% else %}
+                      <span class="in_work">
+                        -
+                       </span>
+                      {% endif %}
+                      
+                  </div>     
+                  <div class="status_col_small">
+                      {% if country.hotel_unihotel_count %}
+                       <span>
+                           <b>{{ country.hotel_unihotel_count }} </b>
+                       </span>
+                      {% else %}
+                      <span>
+                        -
+                       </span>
+                      {% endif %}
+                      
+                  </div>      
+                  <div class="status_col_small">
+                      {% if country.hotel_sinc_count %}
+                       <span>
+                           {{ country.hotel_sinc_count }}
+                       </span>
+                      {% else %}
+                      <span>
+                        -
+                       </span>
+                      {% endif %}
+                      
+                  </div>    
+                  <div class="status_col_small">
+                      {% if country.hotel_unihotel_unique %}
+                       <span>
+                           <a  class="hotel_unihotel_unique" href="#">{{ country.hotel_unihotel_unique }} </a>
+                       </span>
+                      {% else %}
+                      <span>
+                        -
+                       </span>
+                      {% endif %}
+                      
+                  </div>  
+                  <div class="status_col_small">
+                      {% if country.hotel_booking_count %}
+                       <span>
+                           <b>{{ country.hotel_booking_count }}</b>
+                       </span>
+                      {% else %}
+                      <span>
+                        -
+                       </span>
+                      {% endif %}
+                      
+                  </div>    
+                  <div class="status_col_small">
+                      {% if country.hotel_sinc_count %}
+                       <span>
+                           {{ country.hotel_sinc_count}}
+                       </span>
+                      {% else %}
+                      <span>
+                        -
+                       </span>
+                      {% endif %}
+                      
+                  </div>     
+                  <div class="status_col_small">
+                      {% if country.hotel_booking_unique %}
+                       <span>
+                           {{ country.hotel_booking_unique }}
+                       </span>
+                      {% else %}
+                      <span>
+                        -
+                       </span>
+                      {% endif %}
+                      
+                  </div>   
+              </div> 
+           {% endfor %}
+                 
+       </div> 
+      {% endif %}
+    
